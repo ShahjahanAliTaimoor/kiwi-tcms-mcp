@@ -1,40 +1,58 @@
 # kiwi-tcms-mcp
 
-A local [Model Context Protocol](https://modelcontextprotocol.io) server for
-**[Kiwi TCMS](https://kiwitcms.org/)**. It gives Claude (and any MCP client) read/write
-access to your Kiwi test management data from a chat prompt. 
+![license: MIT](https://img.shields.io/badge/license-MIT-green)
+![node: >=18](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
+![MCP](https://img.shields.io/badge/Model_Context_Protocol-server-blue)
 
-It talks to Kiwi's JSON-RPC API (`<base>/json-rpc/`), authenticates with username +
-password, and exposes **49 read/write tools** covering products, versions, builds,
-categories, components, tags, test plans, test cases, test runs and test executions —
-plus a raw `kiwi_rpc` escape hatch for any method not given a dedicated tool.
+A [Model Context Protocol](https://modelcontextprotocol.io) server for
+**[Kiwi TCMS](https://kiwitcms.org/)**. It exposes your Kiwi test-management data to any
+MCP client — Claude Code, Claude Desktop, Cursor, Cline, Zed, Continue, or your own —
+so you can browse and create test cases, build test plans and runs, and record
+execution results from a chat prompt.
 
-Each person runs it **locally** with **their own Kiwi login** — nothing is hosted, no
-shared credentials, nothing exposed to the internet. Permissions are whatever your Kiwi
-account already has.
+- **49 tools** over Kiwi's JSON-RPC API — products, versions, builds, categories,
+  components, tags, test plans, cases, runs, executions — plus a raw `kiwi_rpc` escape
+  hatch for anything without a dedicated tool.
+- **Runs locally** over stdio, authenticates with your own Kiwi username + password.
+  Nothing is hosted, no shared credentials. You get exactly the permissions your Kiwi
+  account has.
+- **No build step** — plain Node ESM, `node src/index.js`.
+
+```
+MCP client  ──MCP (stdio)──▶  kiwi-tcms-mcp  ──HTTPS JSON-RPC──▶  Kiwi TCMS
+```
+
+Coming from TestRail? See the [tool map](#tool-map) — the surface mirrors the
+`@uarlouski/testrail-mcp-server` MCP so a migration is mostly renaming fields.
+
+### Example prompts
+
+> - "List the test plans for product 3 in Kiwi."
+> - "Create a test case under category 12: title 'Login rejects expired token', priority P1, with steps and expected result."
+> - "Mark cases 4001–4010 in run 87 as PASSED with the comment 'regression clean on build 2.3.1'."
+> - "Show the execution history for test execution 55."
 
 ## Setup
 
-**New to this? Follow [`SETUP.md`](SETUP.md)** — step-by-step, plain language.
+**New here? Follow [`SETUP.md`](SETUP.md)** — step-by-step, cross-platform, plain language.
 
 Quick version:
 
 ```bash
-git clone <this-repo>
+git clone https://github.com/ShahjahanAliTaimoor/kiwi-tcms-mcp.git
 cd kiwi-tcms-mcp
 npm install
 ```
 
-### Wire it into Claude Code
+### Wire it into your MCP client
 
-Add a `kiwi` block to the top-level `"mcpServers"` object in `~/.claude.json`
-(`C:\Users\<you>\.claude.json` on Windows). Use **your own** Kiwi login and the path to
-**your** clone:
+Every MCP client takes the same three things — a command, its args, and an env block.
+Point it at `src/index.js` with your own Kiwi login:
 
 ```json
-"kiwi": {
+{
   "command": "node",
-  "args": ["C:\\Users\\<you>\\kiwi-tcms-mcp\\src\\index.js"],
+  "args": ["/absolute/path/to/kiwi-tcms-mcp/src/index.js"],
   "env": {
     "KIWI_URL": "https://kiwi.example.com",
     "KIWI_USERNAME": "<your kiwi login>",
@@ -43,9 +61,16 @@ Add a `kiwi` block to the top-level `"mcpServers"` object in `~/.claude.json`
 }
 ```
 
-Restart Claude Code. Tools appear as `mcp__kiwi__kiwi_get_products`, etc. For the Claude
-desktop app, put the same block in
-`%APPDATA%\Claude\claude_desktop_config.json` and use the full path to `node.exe`.
+- **Claude Code** — put it under the top-level `"mcpServers"` in `~/.claude.json`
+  (`C:\Users\<you>\.claude.json` on Windows), or run `claude mcp add`.
+- **Claude Desktop** — `mcpServers` in `claude_desktop_config.json`
+  (`%APPDATA%\Claude\` on Windows, `~/Library/Application Support/Claude/` on macOS);
+  use an absolute path to `node`.
+- **Cursor / Cline / Continue / Zed** — their MCP settings use the same
+  `command` / `args` / `env` shape.
+
+Restart the client. Tools show up namespaced, e.g. `kiwi_get_products`. On Windows use
+double backslashes in JSON paths. Full walkthrough in [`SETUP.md`](SETUP.md).
 
 ### Environment variables
 
@@ -61,22 +86,25 @@ desktop app, put the same block in
 
 ## Verify
 
-**1. Auth + connectivity smoke test (hits the real instance):**
+**1. Auth + connectivity smoke test** (hits a real instance):
 
+```bash
+# macOS / Linux
+KIWI_URL=https://kiwi.example.com KIWI_USERNAME=you KIWI_PASSWORD=secret npm run smoke
+```
 ```powershell
-$env:KIWI_URL="https://kiwi.example.com"
-$env:KIWI_USERNAME="you@example.com"
-$env:KIWI_PASSWORD="..."
-npm run smoke
+# Windows PowerShell
+$env:KIWI_URL="https://kiwi.example.com"; $env:KIWI_USERNAME="you"; $env:KIWI_PASSWORD="secret"; npm run smoke
 ```
 
-Expect `Auth OK` and a list of products. If it fails on TLS, add
-`$env:KIWI_INSECURE_TLS="1"` and re-run (then add the same to the config `env`).
+Expect `Auth OK` and a list of products. TLS error on an internal CA? Prefix
+`KIWI_INSECURE_TLS=1` (then add the same to your config `env`).
 
-**2. Offline tool-registration check (no network):**
+**2. Offline checks** (no network):
 
-```powershell
-npm run list-tools
+```bash
+npm run list-tools     # prints all 49 registered tools
+npm test               # lint/registration sanity (alias of list-tools)
 ```
 
 ## Remote / hosted (HTTP) — experimental
@@ -135,7 +163,10 @@ A `Dockerfile` is included (`node src/http.js`, port 8787). `npm run http-smoke`
 the server on a random port and runs initialize / tools/list / tools/call / bad-token
 against live Kiwi.
 
-## Tool map (TestRail MCP → this server)
+## Tool map
+
+Grouped by area. Names and grouping mirror the `@uarlouski/testrail-mcp-server` MCP to
+make a TestRail migration mostly mechanical.
 
 | Area | Tools |
 |------|-------|
@@ -150,8 +181,8 @@ against live Kiwi.
 
 - **Shared steps** — Kiwi has no shared-step concept.
 - **Milestones** — use product versions / builds instead.
-- **Templates**, **configurations** — Kiwi uses Environments (out of scope for v1;
-  reach them via `kiwi_rpc` if the Environments plugin is enabled).
+- **Templates**, **configurations** — Kiwi uses Environments instead; reach them via
+  `kiwi_rpc` if the Environments plugin is enabled.
 - **`get_case_fields` / `resolve_case_field`** — Kiwi has no per-product custom-field
   schema RPC. Custom key/value data lives on `TestCase.properties`
   (`kiwi_get_test_case` with `include_properties: true`).
@@ -168,3 +199,27 @@ against live Kiwi.
 
 For the authoritative shape of any object, call `kiwi_rpc` with `<Model>.filter` and one
 example id, or read the [RPC docs](https://kiwitcms.readthedocs.io/en/latest/modules/tcms.rpc.api.html).
+
+## Requirements
+
+- Node.js **18+** (uses global `fetch`)
+- A Kiwi TCMS account with API access on the instance you point at
+
+Each tool inherits your account's permissions. A few methods need extra grants — e.g.
+`kiwi_get_users` requires `auth.view_user`; without it Kiwi returns error `-32098`. The
+error text names the method, so grant the matching permission or use an account that
+has it.
+
+## Contributing
+
+Issues and PRs welcome. Handy while developing:
+
+```bash
+npm run list-tools   # every registered tool, offline
+npm run smoke        # live Auth.login + Product.filter (needs KIWI_* env)
+npm run http-smoke   # spins up the HTTP server and runs initialize/list/call/health
+```
+
+## License
+
+[MIT](LICENSE)

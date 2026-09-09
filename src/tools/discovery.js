@@ -84,7 +84,9 @@ export function register(server, client) {
     server,
     client,
     "kiwi_get_users",
-    "List Kiwi users. Filter e.g. {\"username\": \"sqa1\"} or {\"email__icontains\": \"acme.com\"}.",
+    "List Kiwi users. Filter e.g. {\"username\": \"sqa1\"} or {\"email__icontains\": \"acme.com\"}. " +
+      "Requires the 'auth.view_user' permission on your Kiwi account; without it Kiwi returns " +
+      "error -32098 (\"Authentication failed\").",
     query,
     ({ query }, c) => c.call("User.filter", [query ?? {}])
   );

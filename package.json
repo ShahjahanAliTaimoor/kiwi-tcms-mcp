@@ -1,10 +1,13 @@
 {
   "name": "kiwi-tcms-mcp",
   "version": "1.0.0",
-  "private": true,
   "description": "MCP server for Kiwi TCMS (JSON-RPC API) — 49 read/write tools mirroring the TestRail MCP capability surface.",
   "license": "MIT",
-  "keywords": ["mcp", "model-context-protocol", "kiwi-tcms", "test-management", "qa", "testrail"],
+  "author": "@ShahjahanAliTaimoor",
+  "keywords": ["mcp", "model-context-protocol", "kiwi-tcms", "kiwitcms", "test-management", "qa", "testrail"],
+  "homepage": "https://github.com/ShahjahanAliTaimoor/kiwi-tcms-mcp#readme",
+  "repository": { "type": "git", "url": "https://github.com/ShahjahanAliTaimoor/kiwi-tcms-mcp.git" },
+  "bugs": { "url": "https://github.com/ShahjahanAliTaimoor/kiwi-tcms-mcp/issues" },
   "type": "module",
   "bin": {
     "kiwi-tcms-mcp": "src/index.js"
@@ -15,6 +18,7 @@
     "smoke": "node scripts/smoke.js",
     "http-smoke": "node scripts/http-smoke.js",
     "list-tools": "node scripts/list-tools.js",
+    "test": "node scripts/list-tools.js",
     "gen-token": "node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\""
   },
   "engines": {
