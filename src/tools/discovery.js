@@ -6,7 +6,7 @@ const query = {
     .record(z.any())
     .optional()
     .describe(
-      "Kiwi ORM filter dict, e.g. {\"name\": \"Routica\"} or {\"product_id\": 3}. " +
+      "Kiwi ORM filter dict, e.g. {\"name\": \"My Product\"} or {\"product_id\": 3}. " +
         "Omit or pass {} to list everything."
     ),
 };
@@ -84,7 +84,7 @@ export function register(server, client) {
     server,
     client,
     "kiwi_get_users",
-    "List Kiwi users. Filter e.g. {\"username\": \"sqa1\"} or {\"email__icontains\": \"sofstica\"}.",
+    "List Kiwi users. Filter e.g. {\"username\": \"sqa1\"} or {\"email__icontains\": \"acme.com\"}.",
     query,
     ({ query }, c) => c.call("User.filter", [query ?? {}])
   );

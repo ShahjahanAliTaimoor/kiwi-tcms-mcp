@@ -2,7 +2,9 @@
   "name": "kiwi-tcms-mcp",
   "version": "1.0.0",
   "private": true,
-  "description": "MCP server for Kiwi TCMS (JSON-RPC API) — mirrors the TestRail MCP capability surface for the Routica QA workflow.",
+  "description": "MCP server for Kiwi TCMS (JSON-RPC API) — 49 read/write tools mirroring the TestRail MCP capability surface.",
+  "license": "MIT",
+  "keywords": ["mcp", "model-context-protocol", "kiwi-tcms", "test-management", "qa", "testrail"],
   "type": "module",
   "bin": {
     "kiwi-tcms-mcp": "src/index.js"

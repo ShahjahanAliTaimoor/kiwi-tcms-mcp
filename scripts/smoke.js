@@ -3,8 +3,8 @@
  * Connectivity + auth smoke test. Runs against the real Kiwi instance.
  *
  * Usage (PowerShell):
- *   $env:KIWI_URL="https://kiwi.sofstica.com:8443"
- *   $env:KIWI_USERNAME="you@sofstica.com"
+ *   $env:KIWI_URL="https://kiwi.example.com"
+ *   $env:KIWI_USERNAME="you@example.com"
  *   $env:KIWI_PASSWORD="..."
  *   npm run smoke
  *

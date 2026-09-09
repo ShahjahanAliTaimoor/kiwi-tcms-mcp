@@ -75,13 +75,15 @@ console.log(`tools/list: ${list.result.tools.length} tools\n`);
 console.log("── kiwi_get_products ──");
 console.log(short((await callTool("kiwi_get_products")).text, 900));
 
-console.log("\n── kiwi_get_test_plans {product: 4} (Routica) ──");
-console.log(short((await callTool("kiwi_get_test_plans", { query: { product: 4 } })).text, 1500));
+const PRODUCT_ID = Number(process.env.DEMO_PRODUCT_ID || 1);
 
-console.log("\n── kiwi_get_test_cases {category__product: 4} count ──");
+console.log(`\n── kiwi_get_test_plans {product: ${PRODUCT_ID}} ──`);
+console.log(short((await callTool("kiwi_get_test_plans", { query: { product: PRODUCT_ID } })).text, 1500));
+
+console.log(`\n── kiwi_get_test_cases {category__product: ${PRODUCT_ID}} count ──`);
 {
   const { text, isError } = await callTool("kiwi_get_test_cases", {
-    query: { category__product: 4 },
+    query: { category__product: PRODUCT_ID },
   });
   if (isError) console.log("ERROR:", text);
   else {
@@ -89,7 +91,7 @@ console.log("\n── kiwi_get_test_cases {category__product: 4} count ──");
     try {
       arr = JSON.parse(text);
     } catch {}
-    console.log(`Routica test cases: ${Array.isArray(arr) ? arr.length : "?"}`);
+    console.log(`test cases: ${Array.isArray(arr) ? arr.length : "?"}`);
     if (Array.isArray(arr)) {
       for (const c of arr.slice(0, 8)) console.log(`  #${c.id}  ${c.summary}`);
     }

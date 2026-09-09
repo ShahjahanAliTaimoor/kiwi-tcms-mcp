@@ -1,8 +1,10 @@
 # kiwi-tcms-mcp
 
-A local [Model Context Protocol](https://modelcontextprotocol.io) server for **Kiwi TCMS**,
-built to replace the TestRail MCP (`@uarlouski/testrail-mcp-server`) after the Routica QA
-team migrated from TestRail to Kiwi TCMS.
+A local [Model Context Protocol](https://modelcontextprotocol.io) server for
+**[Kiwi TCMS](https://kiwitcms.org/)**. It gives Claude (and any MCP client) read/write
+access to your Kiwi test management data from a chat prompt. Built as a like-for-like
+replacement for the TestRail MCP (`@uarlouski/testrail-mcp-server`) for teams moving off
+TestRail.
 
 It talks to Kiwi's JSON-RPC API (`<base>/json-rpc/`), authenticates with username +
 password, and exposes **49 read/write tools** covering products, versions, builds,
@@ -15,7 +17,7 @@ account already has.
 
 ## Setup
 
-**New to this? Follow [`TEAM-SETUP.md`](TEAM-SETUP.md)** — step-by-step, plain language.
+**New to this? Follow [`SETUP.md`](SETUP.md)** — step-by-step, plain language.
 
 Quick version:
 
@@ -36,7 +38,7 @@ Add a `kiwi` block to the top-level `"mcpServers"` object in `~/.claude.json`
   "command": "node",
   "args": ["C:\\Users\\<you>\\kiwi-tcms-mcp\\src\\index.js"],
   "env": {
-    "KIWI_URL": "https://kiwi.sofstica.com:8443",
+    "KIWI_URL": "https://kiwi.example.com",
     "KIWI_USERNAME": "<your kiwi login>",
     "KIWI_PASSWORD": "<your kiwi password>"
   }
@@ -51,21 +53,21 @@ desktop app, put the same block in
 
 | Var | Required | Notes |
 |-----|----------|-------|
-| `KIWI_URL` | yes | Base URL only, no path. e.g. `https://kiwi.sofstica.com:8443` |
+| `KIWI_URL` | yes | Base URL only, no path. e.g. `https://kiwi.example.com` |
 | `KIWI_USERNAME` | yes | Kiwi login (email or username) |
 | `KIWI_PASSWORD` | yes | Kiwi password |
 | `KIWI_INSECURE_TLS` | no | Set to `1` only if the host's TLS cert is not trusted by Node (self-signed / internal CA). Disables cert verification for the whole process — prefer trusting the CA instead. |
 
-> Credentials sit in `~/.claude.json` in plain text, same as the previous TestRail API
-> key. Keep that file private.
+> Credentials sit in `~/.claude.json` in plain text (same posture as most MCP client
+> configs). Keep that file private and out of version control.
 
 ## Verify
 
 **1. Auth + connectivity smoke test (hits the real instance):**
 
 ```powershell
-$env:KIWI_URL="https://kiwi.sofstica.com:8443"
-$env:KIWI_USERNAME="you@sofstica.com"
+$env:KIWI_URL="https://kiwi.example.com"
+$env:KIWI_USERNAME="you@example.com"
 $env:KIWI_PASSWORD="..."
 npm run smoke
 ```
@@ -79,17 +81,17 @@ Expect `Auth OK` and a list of products. If it fails on TLS, add
 npm run list-tools
 ```
 
-## Remote / hosted (HTTP) — experimental, not in use
+## Remote / hosted (HTTP) — experimental
 
-> **Status:** built and smoke-tested, **not deployed and not recommended for team use.**
-> The stdio setup above is the supported path. This section is kept for whenever there's
-> a proper, IT-owned host with a service account. Do **not** run this behind a personal
-> tunnel for shared use — it puts an authenticated path to internal Kiwi on the public
-> internet, protected only by a URL token.
+> **Status:** built and smoke-tested, not battle-tested in production. Only host this if
+> you understand the exposure: it puts an authenticated path to your Kiwi instance on
+> whatever network the host is reachable from, protected by a URL/bearer token. Put it
+> behind a real host with a dedicated Kiwi service account, not a personal tunnel with
+> your own login.
 
-The stdio server only works with a **local** Claude (CLI / desktop app). Using it from
-**claude.ai in a browser** needs the HTTP transport plus a publicly reachable host, then
-a custom connector.
+The stdio server only works with a **local** Claude (CLI / desktop app). To use it from
+**claude.ai in a browser**, run the HTTP transport on a publicly reachable host and add
+it as a custom connector.
 
 **1. Generate an auth token** (any client that knows it can call the server):
 
@@ -100,8 +102,8 @@ npm run gen-token
 **2. Run the HTTP server:**
 
 ```powershell
-$env:KIWI_URL="https://kiwi.sofstica.com:8443"
-$env:KIWI_USERNAME="you@sofstica.com"
+$env:KIWI_URL="https://kiwi.example.com"
+$env:KIWI_USERNAME="you@example.com"
 $env:KIWI_PASSWORD="..."
 $env:MCP_AUTH_TOKEN="<token from step 1>"
 npm run http

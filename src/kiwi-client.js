@@ -41,7 +41,7 @@ function looksLikeAuthProblem(rpcError) {
 export class KiwiClient {
   /**
    * @param {object} opts
-   * @param {string} opts.url       Base URL, e.g. https://kiwi.sofstica.com:8443
+   * @param {string} opts.url       Base URL, e.g. https://kiwi.example.com
    * @param {string} opts.username
    * @param {string} opts.password
    */

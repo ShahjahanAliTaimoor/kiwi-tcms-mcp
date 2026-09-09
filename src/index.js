@@ -5,7 +5,7 @@
  * For the remote/HTTP entrypoint used by claude.ai custom connectors, see src/http.js.
  *
  * Env:
- *   KIWI_URL           Base URL of the Kiwi instance, e.g. https://kiwi.sofstica.com:8443
+ *   KIWI_URL           Base URL of the Kiwi instance, e.g. https://kiwi.example.com
  *   KIWI_USERNAME      Kiwi login
  *   KIWI_PASSWORD      Kiwi password
  *   KIWI_INSECURE_TLS  Set to 1 only if the host presents an untrusted/self-signed cert
