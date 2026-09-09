@@ -2,9 +2,7 @@
 
 A local [Model Context Protocol](https://modelcontextprotocol.io) server for
 **[Kiwi TCMS](https://kiwitcms.org/)**. It gives Claude (and any MCP client) read/write
-access to your Kiwi test management data from a chat prompt. Built as a like-for-like
-replacement for the TestRail MCP (`@uarlouski/testrail-mcp-server`) for teams moving off
-TestRail.
+access to your Kiwi test management data from a chat prompt. 
 
 It talks to Kiwi's JSON-RPC API (`<base>/json-rpc/`), authenticates with username +
 password, and exposes **49 read/write tools** covering products, versions, builds,
