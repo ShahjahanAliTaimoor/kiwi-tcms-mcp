@@ -205,10 +205,18 @@ example id, or read the [RPC docs](https://kiwitcms.readthedocs.io/en/latest/mod
 - Node.js **18+** (uses global `fetch`)
 - A Kiwi TCMS account with API access on the instance you point at
 
-Each tool inherits your account's permissions. A few methods need extra grants — e.g.
-`kiwi_get_users` requires `auth.view_user`; without it Kiwi returns error `-32098`. The
-error text names the method, so grant the matching permission or use an account that
-has it.
+Every tool runs with **your account's Kiwi permissions**. Kiwi enforces per-model
+add/change/delete/view grants, so a login can easily be able to *create* a test case
+but not *edit* or *delete* one. When a grant is missing Kiwi returns error `-32098`
+("Authentication failed when calling `<Method>`") — that's a permissions problem, not a
+bug. Common ones: `auth.view_user` for `kiwi_get_users`; `testcases.change_testcase` /
+`testcases.delete_testcase` for `kiwi_update_test_case` / `kiwi_delete_test_case`;
+likewise for `testplans.*`, `testruns.*`, `testexecutions.*`. Grant the matching
+permission (Kiwi admin → user/group), or use an account that has it.
+
+Verified against a live Kiwi 16.3 instance: all read tools, `kiwi_create_test_case` and
+`kiwi_add_test_case_comment` work end-to-end; `update`/`delete` were correctly refused
+on a create-only account with `-32098`.
 
 ## Contributing
 
